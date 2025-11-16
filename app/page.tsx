@@ -459,20 +459,22 @@ const handleSubmit = async (e: React.FormEvent) => {
       marginBottom: '50px',
       letterSpacing: '0.5px'
     }}>
-      Той жайлы
+    
     </h2>
 
     {/* Той иелері */}
     <div style={{ marginBottom: '45px' }}>
-      <p style={{ 
-        fontSize: '15px', 
-        color: '#888', 
-        marginBottom: '12px', 
-        fontWeight: '500',
-        letterSpacing: '0.5px'
-      }}>
-        Той иелері:
-      </p>
+        <p
+    style={{
+      fontSize: '15px',
+      color: '#000',        // black text
+      marginBottom: '12px',
+      fontWeight: '700',    // bold
+      letterSpacing: '0.5px',
+    }}
+  >
+    ТОЙ ИЕЛЕРІ:
+  </p>
       <p style={{ 
         fontSize: '32px', 
         fontWeight: '700', 
@@ -603,7 +605,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         color: '#1a1a1a',
         letterSpacing: '0.3px'
       }}>
-        Қазығұрт - Нұр
+        Қазығұрт - Нұр 2
       </p>
     </div>
 
