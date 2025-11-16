@@ -929,70 +929,72 @@ const handleSubmit = async (e: React.FormEvent) => {
       </label>
     </div>
 
-    <div style={{ marginBottom: '25px' }}>
-      <label style={{ 
-        display: 'block', 
-        fontSize: '15px', 
-        color: '#666', 
-        marginBottom: '10px',
-        fontWeight: '500'
-      }}>
-        Аты-жөніңіз:
-      </label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Аты-жөніңіз"
-        required
-        style={{
-          width: '100%',
-          padding: '16px 18px',
-          fontSize: '16px',
-          border: '1.5px solid #d1d5db',
-          borderRadius: '12px',
-          outline: 'none',
-          fontFamily: "'Playfair Display', serif",
-          transition: 'border-color 0.3s ease',
-          background: 'white'
-        }}
-        onFocus={(e) => e.currentTarget.style.borderColor = '#22c55e'}
-        onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-      />
-    </div>
+   <div style={{ marginBottom: '25px' }}>
+  <label style={{ 
+    display: 'block', 
+    fontSize: '15px', 
+    color: '#666', 
+    marginBottom: '10px',
+    fontWeight: '500'
+  }}>
+    Аты-жөніңіз:
+  </label>
+  <input
+    type="text"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    placeholder="Аты-жөніңіз"
+    required
+    style={{
+      width: '100%',
+      padding: '16px 18px',
+      fontSize: '16px',
+      border: '1.5px solid #d1d5db',
+      borderRadius: '12px',
+      outline: 'none',
+      fontFamily: "'Playfair Display', serif",
+      transition: 'border-color 0.3s ease',
+      background: 'white',
+      color: '#000'
+    }}
+    onFocus={(e) => e.currentTarget.style.borderColor = '#22c55e'}
+    onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
+  />
+</div>
 
-    <div style={{ marginBottom: '35px' }}>
-      <label style={{ 
-        display: 'block', 
-        fontSize: '15px', 
-        color: '#666', 
-        marginBottom: '10px',
-        fontWeight: '500'
-      }}>
-        Той иелеріне тілегіңіз:
-      </label>
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Тілегіңізді осында жазыңыз"
-        required
-        rows={5}
-        style={{
-          width: '100%',
-          padding: '16px 18px',
-          fontSize: '16px',
-          border: '1.5px solid #d1d5db',
-          borderRadius: '12px',
-          outline: 'none',
-          resize: 'vertical',
-          fontFamily: "'Playfair Display', serif",
-          transition: 'border-color 0.3s ease',
-          background: 'white'
-        }}
-        onFocus={(e) => e.currentTarget.style.borderColor = '#22c55e'}
-        onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-      />
-    </div>
+<div style={{ marginBottom: '35px' }}>
+  <label style={{ 
+    display: 'block', 
+    fontSize: '15px', 
+    color: '#666', 
+    marginBottom: '10px',
+    fontWeight: '500'
+  }}>
+    Той иелеріне тілегіңіз:
+  </label>
+  <textarea
+    value={message}
+    onChange={(e) => setMessage(e.target.value)}
+    placeholder="Тілегіңізді осында жазыңыз"
+    required
+    rows={5}
+    style={{
+      width: '100%',
+      padding: '16px 18px',
+      fontSize: '16px',
+      border: '1.5px solid #d1d5db',
+      borderRadius: '12px',
+      outline: 'none',
+      resize: 'vertical',
+      fontFamily: "'Playfair Display', serif",
+      transition: 'border-color 0.3s ease',
+      background: 'white',
+      color: '#000'
+    }}
+    onFocus={(e) => e.currentTarget.style.borderColor = '#22c55e'}
+    onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
+  />
+</div>
 
     <button
       type="submit"
