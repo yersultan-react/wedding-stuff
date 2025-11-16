@@ -18,6 +18,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [attendance, setAttendance] = useState<'yes' | 'maybe' | 'no'>('yes');
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   type Submission = {
     id: number;
@@ -116,6 +117,11 @@ useEffect(() => {
       setIsPlaying(!isPlaying);
     }
   };
+  useEffect(() => {
+  setIsVisible(true);
+}, []);
+
+// Замените style в <style> блоке на это:
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -135,40 +141,34 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
   
   try {
-    // Проверяем доступность window.storage (только на claude.ai)
-    if (typeof window !== 'undefined' && window.storage) {
-      // Claude.ai storage
-      await window.storage.set(
-        `submission:${newSubmission.id}`, 
-        JSON.stringify(newSubmission),
-        true
-      );
+    // Отправка на email через API
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newSubmission),
+    });
+
+    if (response.ok) {
+      // Очистить форму
+      setName('');
+      setMessage('');
+      setAttendance('yes');
+      
+      alert(`Рақмет! ${newSubmission.name}, сіздің тілегіңіз қабылданды!`);
     } else {
-      // Fallback на localStorage для локальной разработки
-      const existingData = localStorage.getItem('submissions');
-      const allSubmissions = existingData ? JSON.parse(existingData) : [];
-      allSubmissions.unshift(newSubmission);
-      localStorage.setItem('submissions', JSON.stringify(allSubmissions));
+      alert('Қате! Қайталап көріңіз.');
     }
-    
-    // Обновление локального состояния
-    setSubmissions([newSubmission, ...submissions]);
-    
-    // Очистить форму
-    setName('');
-    setMessage('');
-    setAttendance('yes');
-    
-    alert(`Рақмет! ${newSubmission.name}, сіздің тілегіңіз қабылданды!`);
   } catch (error) {
-    console.error('Ошибка сохранения:', error);
+    console.error('Ошибка отправки:', error);
     alert('Қате! Қайталап көріңіз.');
   }
 };
 
   // Обратный отсчет
   useEffect(() => {
-    const targetDate = new Date('2025-12-23T20:00:00').getTime();
+    const targetDate = new Date('2025-12-23T19:00:00').getTime();
     
     const updateCountdown = () => {
       const now = new Date().getTime();
@@ -193,53 +193,97 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
-        
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Playfair Display', serif;
-          background: #fafafa;
-        }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Playfair Display', serif;
+    background: #fafafa;
+  }
 
-        .music-btn {
-          position: fixed;
-          bottom: 80px;
-          left: 20px;
-          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-          color: white;
-          border: none;
-          padding: 14px 32px;
-          border-radius: 50px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          z-index: 1000;
-          transition: all 0.3s ease;
-          font-family: 'Playfair Display', serif;
-        }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-        .music-btn:hover {
-          transform: scale(1.05);
-          box-shadow: 0 12px 35px rgba(34, 197, 94, 0.6);
-        }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
-        .play-icon {
-          width: 0;
-          height: 0;
-          border-left: 12px solid white;
-          border-top: 8px solid transparent;
-          border-bottom: 8px solid transparent;
-        }
-      `}</style>
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.6s ease-out forwards;
+  }
+
+  .music-btn {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    borderRadius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .music-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(34, 197, 94, 0.6);
+  }
+
+  .play-icon {
+    width: 0;
+    height: 0;
+    border-left: 12px solid white;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+  }
+`}</style>
+
 
       <audio ref={audioRef} loop>
         <source src="/wedding-music.mp3" type="audio/mpeg" />
@@ -285,7 +329,10 @@ const handleSubmit = async (e: React.FormEvent) => {
   </div>
 
   {/* Фото */}
-  <div style={{
+{/* Фото */}
+<div 
+  className="animate-scale-in"
+  style={{
     width: '92%',
     maxWidth: '420px',
     margin: '0 auto',
@@ -294,7 +341,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     overflow: 'hidden',
     position: 'relative',
     marginTop: '20px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+    boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+    opacity: 0,
+    animationDelay: '0.3s'
   }}>
     <img 
       src="/wedding-photo.jpg" 
@@ -320,20 +369,28 @@ const handleSubmit = async (e: React.FormEvent) => {
   </div>
 
   {/* Заголовок */}
-  <h1 style={{
-    fontSize: '36px',
+ {/* Заголовок */}
+<h1 
+  className="animate-fade-in-up"
+  style={{
+    fontSize: '20px',
     fontWeight: '700',
     color: '#3d5a2a',
     textAlign: 'center',
     margin: '50px 20px 35px',
     letterSpacing: '2px',
-    fontFamily: "'Playfair Display', serif"
+    fontFamily: "'Playfair Display', serif",
+    opacity: 0,
+    animationDelay: '0.6s'
   }}>
-    ҚҰРМЕТТІ ҚОНАҚТАР!
+     ҚҰРМЕТТІ <br/>
+     АҒАЙЫН-ТУЫС, БАУЫРЛАР, НАҒАШЫ-ЖИЕН, БӨЛЕЛЕР, ҚҰДА-ЖЕКЖАТ, ДОС-ЖАРАНДАР, ӘРІПТЕСТЕР, КӨРШІЛЕР! 
   </h1>
 
   {/* Текст */}
-  <p style={{
+ <p 
+  className="animate-fade-in-up"
+  style={{
     fontSize: '18px',
     lineHeight: '1.9',
     color: '#555',
@@ -342,7 +399,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     marginBottom: '40px',
     maxWidth: '500px',
     margin: '0 auto',
-    fontWeight: '400'
+    fontWeight: '400',
+    opacity: 0,
+    animationDelay: '0.9s'
   }}>
     Сіздерді ұлымыз Сапарәлі мен келініміз Гүлназдың шаңырақ көтеру тойына арналған салтанатты ақ дастарханымыздың қадірлі қонағы болуға шақырамыз.
   </p>
@@ -362,19 +421,23 @@ const handleSubmit = async (e: React.FormEvent) => {
   marginTop: '-60px'
 }}>
   {/* Волнистая рамка */}
-<div style={{
-  background: '#ffffff',
-  margin: '0 20px',
-  padding: '80px 40px 50px',
-  borderRadius: '120px / 80px',
-  boxShadow: '0 40px 80px rgba(0,0,0,0.12), 0 20px 40px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.05)',
-  border: 'none',
-  position: 'relative',
-  textAlign: 'center',
-  maxWidth: '420px',
-  marginLeft: 'auto',
-  marginRight: 'auto'
-}}>
+<div 
+  className="animate-fade-in"
+  style={{
+    background: '#ffffff',
+    margin: '0 20px',
+    padding: '80px 40px 50px',
+    borderRadius: '120px / 80px',
+    boxShadow: '0 40px 80px rgba(0,0,0,0.12), 0 20px 40px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.05)',
+    border: 'none',
+    position: 'relative',
+    textAlign: 'center',
+    maxWidth: '420px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    opacity: 0,
+    animationDelay: '0.4s'
+  }}>
      <img 
       src="/flowers.png" 
       alt="flowers"
@@ -421,25 +484,44 @@ const handleSubmit = async (e: React.FormEvent) => {
     </div>
 
     {/* Тойдың басталу уақыты */}
-    <div style={{ marginBottom: '45px' }}>
-      <p style={{ 
-        fontSize: '15px', 
-        color: '#888', 
-        marginBottom: '12px', 
-        fontWeight: '500',
-        letterSpacing: '0.5px'
-      }}>
-        Тойдың басталу уақыты:
-      </p>
-      <p style={{ 
-        fontSize: '26px', 
-        fontWeight: '700', 
-        color: '#1a1a1a',
-        letterSpacing: '0.5px'
-      }}>
-        23.12.2025 / сағат 20:00
-      </p>
-    </div>
+<div style={{ marginBottom: '45px' }}>
+  <p style={{ 
+    fontSize: '15px', 
+    color: '#888', 
+    marginBottom: '12px', 
+    fontWeight: '500',
+    letterSpacing: '0.5px'
+  }}>
+    Беташардың басталу уақыты:
+  </p>
+  <p style={{ 
+    fontSize: '26px', 
+    fontWeight: '700', 
+    color: '#1a1a1a',
+    letterSpacing: '0.5px',
+    marginBottom: '25px'
+  }}>
+    23.12.2025 / сағат 18:00
+  </p>
+  
+  <p style={{ 
+    fontSize: '15px', 
+    color: '#888', 
+    marginBottom: '12px', 
+    fontWeight: '500',
+    letterSpacing: '0.5px'
+  }}>
+    Тойдың басталу уақыты:
+  </p>
+  <p style={{ 
+    fontSize: '26px', 
+    fontWeight: '700', 
+    color: '#1a1a1a',
+    letterSpacing: '0.5px'
+  }}>
+    23.12.2025 / сағат 19:00
+  </p>
+</div>
 
     {/* Обратный отсчет */}
     <div style={{ marginBottom: '45px' }}>
@@ -649,7 +731,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         Сапарәлі
       </p>
 
-      <a href="https://www.instagram.com" style={{
+      <a href="https://www.instagram.com/saparaly7279?igsh=MTVkYTd0ajJlYm0ybA==" style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: '6px',
@@ -663,7 +745,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#E4405F">
           <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.4s-.644-1.44-1.439-1.44z"/>
         </svg>
-        @your_insta
+        @saparaly7279
       </a>
     </div>
 
@@ -693,7 +775,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         Гүлназ
       </p>
 
-      <a href="https://www.instagram.com" style={{
+      <a href="https://www.instagram.com/kairatvnaaaa?igsh=ajZuZmY2eHQ5cXYz" style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: '6px',
@@ -707,7 +789,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#E4405F">
           <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.4s-.644-1.44-1.439-1.44z"/>
         </svg>
-        @your_insta
+        @kairatvnaaaa
       </a>
     </div>
   </div>
@@ -944,138 +1026,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 </div>
 
 {/* Футер - Тілектер */}
-{submissions.length > 0 && (
-  <div style={{ 
-    padding: '40px 20px 60px', 
-    background: '#fff',
-    maxWidth: '600px',
-    margin: '0 auto'
-  }}>
-    <h3 style={{
-      fontSize: '28px',
-      fontWeight: '700',
-      color: '#1a1a1a',
-      textAlign: 'center',
-      marginBottom: '40px',
-      fontFamily: "'Playfair Display', serif"
-    }}>
-      Тілектер
-    </h3>
-    
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {submissions.map((sub) => (
-        <div 
-          key={sub.id}
-          style={{
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-            borderRadius: '20px',
-            padding: '25px',
-            boxShadow: '0 4px 20px rgba(34, 197, 94, 0.1)',
-            border: '2px solid #bbf7d0',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Декоративный элемент */}
-          <div style={{
-            position: 'absolute',
-            top: '-20px',
-            right: '-20px',
-            width: '100px',
-            height: '100px',
-            background: 'rgba(34, 197, 94, 0.1)',
-            borderRadius: '50%'
-          }}></div>
-          
-          {/* Заголовок с именем */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '15px',
-            position: 'relative',
-            zIndex: 1
-          }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '22px',
-              fontWeight: '700',
-              boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
-            }}>
-              {sub.name.charAt(0).toUpperCase()}
-            </div>
-            
-            <div style={{ flex: 1 }}>
-              <h4 style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: '#1a1a1a',
-                marginBottom: '4px',
-                fontFamily: "'Playfair Display', serif"
-              }}>
-                {sub.name}
-              </h4>
-              <p style={{
-                fontSize: '13px',
-                color: '#16a34a',
-                fontWeight: '600'
-              }}>
-                {sub.attendance === 'yes' && '✓ Келеді'}
-                {sub.attendance === 'maybe' && '✓ Жұбайымен келеді'}
-                {sub.attendance === 'no' && '✗ Келе алмайды'}
-              </p>
-            </div>
-            
-            <span style={{
-              fontSize: '12px',
-              color: '#666',
-              fontWeight: '500'
-            }}>
-              {sub.date}
-            </span>
-          </div>
-          
-          {/* Сообщение */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '18px',
-            position: 'relative',
-            zIndex: 1,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-          }}>
-            <p style={{
-              fontSize: '16px',
-              lineHeight: '1.6',
-              color: '#374151',
-              fontStyle: 'italic'
-            }}>
-              "{sub.message}"
-            </p>
-          </div>
-          
-          {/* Декоративная иконка */}
-          <div style={{
-            position: 'absolute',
-            bottom: '15px',
-            right: '15px',
-            fontSize: '40px',
-            opacity: '0.2'
-          }}>
-            💚
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+
       </div>
     </>
   );
